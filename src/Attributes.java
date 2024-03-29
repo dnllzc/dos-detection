@@ -21,6 +21,5 @@ public class Attributes {
         this.flags = flags;
         this.size = size;
         this.length = length;
-        this.isMalicious = PacketChecker.checkPacket(this);
     }
 }

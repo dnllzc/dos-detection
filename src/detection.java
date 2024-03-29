@@ -5,32 +5,54 @@ import java.util.concurrent.TimeUnit;
 public class detection{
 
     public static LinkedList<Attributes> attributesList = Attributes.attributesList;
+    public static LinkedList<Queues> queues = Queues.queues;
+    public static boolean responsePacket = false;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String[] commands = {"bash", "-c", "tcpdump", "-i", "any", "port", "8080", "and", "'(tcp-syn|tcp-ack)!=0'"};
         //String cmd = "/home/dnllzc/Desktop/DOS/src/tcpdump.sh";
+
+        // Define the command to be executed
         String cmd2 = "tcpdump -i any port 8080 and '(tcp-syn|tcp-ack)!=0'";
 
         //ProcessBuilder pb = new ProcessBuilder(cmd2);
         //Process p = pb.start();
 
+        // Process to execute the command
         ProcessBuilder pb2 = new ProcessBuilder();
         pb2.command("bash", "-c", cmd2);
         Process p = pb2.start();
 
+        // Read the output of the command
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
-            System.out.println(line);
+            //System.out.println(line);
             String[] attributes = line.split(" ");
-            getAttributes(attributes);
-            printAttributes(attributesList.getLast());
+            for (int i = 0; i < attributes.length; i++) {
+                // Check if the packet is a response packet
+                if (attributes[i].equals("IP")) {
+                    responsePacket = attributes[i + 1].contains("http-alt");
+                }
+            }
+
+            if (responsePacket) {
+                System.out.println("Response packet detected");
+            }
+            else {
+                // If it wasn't a response packet, get the attributes
+                getAttributes(attributes);
+                //printAttributes(attributesList.getLast());)
+                PacketChecker.checkAll();
+            }
         }
-        p.waitFor(10, TimeUnit.MILLISECONDS);
+        p.waitFor(1, TimeUnit.MILLISECONDS);
 
     }
 
+    // Parse the attributes from the command output
     private static void getAttributes(String[] attributes) {
+        // Define the attributes
         String time = attributes[0];
         String source = "";
         String flags = "";
@@ -38,6 +60,7 @@ public class detection{
         int length = 0;
         int recordId = Attributes.numOfRecords;
 
+        // Get the attributes
         label:
         for (int i = 0; i < attributes.length; i++) {
             switch (attributes[i]) {
@@ -61,6 +84,7 @@ public class detection{
             }
         }
 
+        // Add the attributes to the list
         attributesList.add(new Attributes(recordId, time, source, flags, size, length));
     }
 

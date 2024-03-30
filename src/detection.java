@@ -23,6 +23,38 @@ public class detection{
         pb2.command("bash", "-c", cmd2);
         Process p = pb2.start();
 
+        // Thread to sort packets to queues
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        PacketChecker.checkAll();
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.start();
+
+        // Thread to check the deviation of the queues
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        PacketChecker.checkDeviation();
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t2.start();
+
         // Read the output of the command
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
@@ -43,7 +75,6 @@ public class detection{
                 // If it wasn't a response packet, get the attributes
                 getAttributes(attributes);
                 //printAttributes(attributesList.getLast());)
-                PacketChecker.checkAll();
             }
         }
         p.waitFor(1, TimeUnit.MILLISECONDS);

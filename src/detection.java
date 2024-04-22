@@ -64,12 +64,13 @@ public class detection{
             for (int i = 0; i < attributes.length; i++) {
                 // Check if the packet is a response packet
                 if (attributes[i].equals("IP")) {
-                    responsePacket = attributes[i + 1].contains("http-alt");
+                    responsePacket = attributes[i + 1].contains(".http-alt");
                 }
             }
 
             if (responsePacket) {
                 System.out.println("Response packet detected");
+                // getAttributes(attributes);
             }
             else {
                 // If it wasn't a response packet, get the attributes

@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 
 public class PacketChecker {
@@ -16,10 +14,15 @@ public class PacketChecker {
         System.out.println("Debug prints");
         System.out.println("----------------------");
         for (Attributes a : attributesList) {
+            String acutalSource = a.source;
+            boolean isHttpAlt = a.source.equals("http-alt");
+
             // Check if the source is new
             if (!sources.contains(a.source)) {
-                sources = sources + a.source + " ";
-                newSource = true;
+                if (!isHttpAlt) {
+                    sources += a.source + " ";
+                    newSource = true;
+                }
             }
             else {
                 newSource = false;
@@ -39,88 +42,12 @@ public class PacketChecker {
 
     // Check the source of the packet
     public static void checkSource(String source) {
-        // If the queues are empty, add the first one
-        if (Queues.queues.isEmpty()) {
-            Queues.queues.add(new Queues(attributesList.get(indexAttribute)));
-            Queues.numQueues++;
-            Queues.queues.get(0).recordIds += attributesList.get(indexAttribute).recordId;
-            Queues.queues.get(0).numOfRecords++;
-            newSource = false;
-        }
-        // If the source is new, add a new queue
-        // else, add the record to the existing queue
-        for (int i = 0; i < Queues.numQueues; i++) {
-            if (newSource) {
-                Queues.queues.add(new Queues(attributesList.get(indexAttribute)));
-                Queues.numQueues++;
-                newSource = false;
-                Queues.queues.get(i).recordIds += "," + attributesList.get(indexAttribute).recordId;
-                Queues.queues.get(i).numOfRecords++;
-                break;
-            }
-            else {
-                for (int j = 0; j < Queues.queues.size(); j++) {
-                    if (Queues.queues.get(j).source.equals(source)) {
-                        if (Queues.queues.get(j).recordIds.contains(Integer.toString(attributesList.get(indexAttribute).recordId))) {
-                            break;
-                        }
-                        Queues.queues.get(j).recordIds += "," + attributesList.get(indexAttribute).recordId;
-                        Queues.queues.get(j).numOfRecords++;
-                        //System.out.println("TEMP DEBUG: NUMBER OF RECORDS: " + Queues.queues.get(j).numOfRecords);
-                        //System.out.println("TEMP DEBUG: NUMBER OF RECORDS 2: " + Queues.queues.get(j).recordIds.split(",").length);
-                        break;
-                    }
-                }
-                break;
-            }
-
-        }
+        DistributedQueues.checkSource(source, indexAttribute, newSource);
     }
 
     // Check the time of the packet
     public static void checkTime() {
-        for (int i = 0; i < Queues.queues.size(); i++) {
-            String[] recordsQueues = Queues.queues.get(i).recordIds.split(",");
-            if (Queues.queues.get(i).numOfRecords < 1) {
-                break;
-            }
-            int recordIndexInQueue = Integer.parseInt(recordsQueues[Queues.queues.get(i).numOfRecords - 1]);
-            String time = attributesList.get(recordIndexInQueue).time;
-            // Remove all entries in queue that are older than 2 minutes
-            // 20:45:17.000000 - time format
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSSSSS");
-            String stringTime = sdf.format(new Date());
-            System.out.println("Debug Log: Current time: " + stringTime);
-            System.out.println("Debug Log: Packet time: " + time);
-            String[] currTime = stringTime.split(":");
-            String[] packetTime = time.split(":");
-
-            int minutesCurr = Integer.parseInt(currTime[1]);
-            int minutesPacket = Integer.parseInt(packetTime[1]);
-
-            System.out.println("Debug Log: Current minutes: " + minutesCurr);
-            System.out.println("Debug Log: Packet minutes: " + minutesPacket);
-
-            if (minutesCurr - minutesPacket > 2) {
-                // Remove record from Attributes list with the same recordId
-                for (int j = 0; j < attributesList.size(); j++) {
-                    if (attributesList.get(j).recordId == recordIndexInQueue) {
-                        attributesList.remove(j);
-                        break;
-                    }
-                }
-                // Remove record from Queues list with the same recordId
-                // and shift all records to the left
-                for (int j = 0; j < recordsQueues.length; j++) {
-                    if (Integer.parseInt(recordsQueues[j]) == recordIndexInQueue) {
-                        for (int k = j; k < recordsQueues.length - 1; k++) {
-                            recordsQueues[k] = recordsQueues[k + 1];
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        DistributedQueues.checkTime();
     }
 
     // Just some debugging prints

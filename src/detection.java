@@ -1,5 +1,7 @@
 import java.util.*;
 import java.io.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class detection{
@@ -7,6 +9,7 @@ public class detection{
     public static LinkedList<Attributes> attributesList = Attributes.attributesList;
     public static LinkedList<Queues> queues = Queues.queues;
     public static boolean responsePacket = false;
+    public static BlockingQueue<String[]> packetQueue = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String[] commands = {"bash", "-c", "tcpdump", "-i", "any", "port", "8080", "and", "'(tcp-syn|tcp-ack)!=0'"};
@@ -55,69 +58,53 @@ public class detection{
         });
         t2.start();
 
+        Thread t3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        String[] packet = packetQueue.take();
+                        processPacket(packet);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t3.start();
+
         // Read the output of the command
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
             //System.out.println(line);
             String[] attributes = line.split(" ");
-            for (int i = 0; i < attributes.length; i++) {
-                // Check if the packet is a response packet
-                if (attributes[i].equals("IP")) {
-                    responsePacket = attributes[i + 1].contains(".http-alt");
-                }
-            }
-
-            if (responsePacket) {
-                System.out.println("Response packet detected");
-                // getAttributes(attributes);
-            }
-            else {
-                // If it wasn't a response packet, get the attributes
-                getAttributes(attributes);
-                //printAttributes(attributesList.getLast());)
-            }
+            packetQueue.put(attributes);
         }
         p.waitFor(1, TimeUnit.MILLISECONDS);
 
     }
 
-    // Parse the attributes from the command output
-    private static void getAttributes(String[] attributes) {
-        // Define the attributes
-        String time = attributes[0];
-        String source = "";
-        String flags = "";
-        int size = 0;
-        int length = 0;
-        int recordId = Attributes.numOfRecords;
-
-        // Get the attributes
-        label:
-        for (int i = 0; i < attributes.length; i++) {
-            switch (attributes[i]) {
-                case "IP":
-                    source = attributes[i + 1];
-                    break;
-                case "Flags":
-                    flags = attributes[i + 1].substring(0, attributes[i + 1].length() - 1);
-                    break;
-                case "win":
-                    size = Integer.parseInt(attributes[i + 1].substring(0, attributes[i + 1].length() - 1));
-                    break;
-                case "length":
-                    if (attributes[i + 1].matches("[0-9]+")) {
-                        length = Integer.parseInt(attributes[i + 1]);
-                    } else {
-                        length = Integer.parseInt(attributes[i + 1].substring(0, attributes[i + 1].length() - 1));
-                    }
-                    Attributes.numOfRecords++;
-                    break label;
+    public static void processPacket(String[] attributes) {
+        for(int i=0; i<attributes.length; i++) {
+            if (attributes[i].equals("IP")) {
+                responsePacket = attributes[i + 1].equals(".http-alt");
+                String actualSource = attributes[i + 1].split("\\.")[0];
+                attributes[i + 1] = actualSource;
             }
         }
 
-        // Add the attributes to the list
-        attributesList.add(new Attributes(recordId, time, source, flags, size, length));
+        if (responsePacket) {
+            System.out.println("Response packet detected");
+        }
+        else {
+            getAttributes(attributes);
+        }
+    }
+
+    // Parse the attributes from the command output
+    private static void getAttributes(String[] attributes) {
+        DistributedQueues.distributePackets(attributes);
     }
 
     public static void printAttributes(Attributes a) {

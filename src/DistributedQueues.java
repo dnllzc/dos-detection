@@ -14,7 +14,6 @@ public class DistributedQueues {
         // Define the attributes
         String time = attributes[0];
         String source = "";
-        String actualSource = "";
         String flags = "";
         int size = 0;
         int length = 0;
@@ -27,8 +26,6 @@ public class DistributedQueues {
             switch (attributes[i]) {
                 case "IP":
                     source = attributes[i + 1];
-                    actualSource = source.split("\\.")[0];
-                    isHttpAlt = source.split("\\.")[1].equals("http-alt");
                     break;
                 case "Flags":
                     flags = attributes[i + 1].substring(0, attributes[i + 1].length() - 1);
@@ -49,7 +46,7 @@ public class DistributedQueues {
 
         // Add the attributes to the list
         if (!isHttpAlt) {
-            attributesList.add(new Attributes(recordId, time, actualSource, flags, size, length));
+            attributesList.add(new Attributes(recordId, time, source, flags, size, length));
         }
     }
 

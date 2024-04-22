@@ -89,8 +89,7 @@ public class detection{
         for(int i=0; i<attributes.length; i++) {
             if (attributes[i].equals("IP")) {
                 responsePacket = attributes[i + 1].equals(".http-alt");
-                String actualSource = attributes[i + 1].split("\\.")[0];
-                attributes[i + 1] = actualSource;
+                break;
             }
         }
 
@@ -104,6 +103,14 @@ public class detection{
 
     // Parse the attributes from the command output
     private static void getAttributes(String[] attributes) {
+        for (int i=0; i<attributes.length; i++) {
+            if (attributes[i].equals("IP")) {
+                String tempSource = attributes[i + 1];
+                String[] actualSource = tempSource.split("\\.");
+                attributes[i + 1] = actualSource[0];
+                break;
+            }
+        }
         DistributedQueues.distributePackets(attributes);
     }
 

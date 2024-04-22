@@ -14,15 +14,11 @@ public class PacketChecker {
         System.out.println("Debug prints");
         System.out.println("----------------------");
         for (Attributes a : attributesList) {
-            String acutalSource = a.source;
-            boolean isHttpAlt = a.source.equals("http-alt");
 
             // Check if the source is new
             if (!sources.contains(a.source)) {
-                if (!isHttpAlt) {
-                    sources += a.source + " ";
-                    newSource = true;
-                }
+                sources += a.source + " ";
+                newSource = true;
             }
             else {
                 newSource = false;

@@ -1,5 +1,3 @@
-import mpi.MPI;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -51,8 +49,8 @@ public class DistributedQueues {
     }
 
     public static void checkSource(String source, int indexAttribute, boolean newSource) {
-        String[] args = {};
-        MPI.Init(args);
+        //String[] args = {};
+        //MPI.Init(detection.mpiArgs);
 
         // If the queues are empty, add the first one
         if (Queues.queues.isEmpty()) {
@@ -91,12 +89,12 @@ public class DistributedQueues {
 
         }
 
-        MPI.Finalize();
+        //MPI.Finalize();
     }
 
     public static void checkTime() {
-        String[] args = {};
-        MPI.Init(args);
+        //String[] args = {};
+        //MPI.Init(detection.mpiArgs);
         for (int i = 0; i < Queues.queues.size(); i++) {
             String[] recordsQueues = Queues.queues.get(i).recordIds.split(",");
             if (Queues.queues.get(i).numOfRecords < 1) {

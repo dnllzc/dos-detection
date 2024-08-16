@@ -1,5 +1,9 @@
-import java.util.*;
-import java.io.*;
+import mpi.MPI;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -10,10 +14,13 @@ public class detection{
     public static LinkedList<Queues> queues = Queues.queues;
     public static boolean responsePacket = false;
     public static BlockingQueue<String[]> packetQueue = new LinkedBlockingQueue<>();
+    public static String[] mpiArgs;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String[] commands = {"bash", "-c", "tcpdump", "-i", "any", "port", "8080", "and", "'(tcp-syn|tcp-ack)!=0'"};
         //String cmd = "/home/dnllzc/Desktop/DOS/src/tcpdump.sh";
+        mpiArgs = args;
+        MPI.Init(mpiArgs);
 
         // Define the command to be executed
         String cmd2 = "tcpdump -i any port 8080 and '(tcp-syn|tcp-ack)!=0'";
@@ -83,6 +90,7 @@ public class detection{
         }
         p.waitFor(1, TimeUnit.MILLISECONDS);
 
+        MPI.Finalize();
     }
 
     public static void processPacket(String[] attributes) {

@@ -39,15 +39,18 @@ Denial of Service (DoS) is a well-known attack vector aimed at using up the avai
    ```
 2. Compile the Java classes:
    ```sh
-   sudo javac -cp .:$MPJ_HOME/lib/mpj.jar DistributedQueues.java 
-   sudo javac *.java
+   sudo javac -cp .:$MPJ_HOME/lib/mpj.jar *.java 
    ```
+Or just run the auto compile and run script:
+   ```sh
+   sudo ./compile.sh
+   '''
 
 ## Usage
 
 1. **Run the detection application**:
    ```sh
-   sudo java detection
+   sudo $MPJ_HOME/bin/mpjrun.sh -np 2 detection 0 $MPJ_HOME/conf/mpj8.conf enp0s3
    ```
 
 ## How It Works

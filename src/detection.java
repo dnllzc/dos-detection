@@ -34,7 +34,7 @@ public class detection{
         Process p = pb2.start();
 
         // Thread to sort packets to queues
-        Thread t = new Thread(new Runnable() {
+        Thread packetSort = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -47,10 +47,10 @@ public class detection{
                 }
             }
         });
-        t.start();
+        packetSort.start();
 
         // Thread to check the deviation of the queues
-        Thread t2 = new Thread(new Runnable() {
+        Thread deviationCheck = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -63,9 +63,9 @@ public class detection{
                 }
             }
         });
-        t2.start();
+        deviationCheck.start();
 
-        Thread t3 = new Thread(new Runnable() {
+        Thread packetProcess = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -78,16 +78,45 @@ public class detection{
                 }
             }
         });
-        t3.start();
+        packetProcess.start();
 
-        // Read the output of the command
-        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            //System.out.println(line);
-            String[] attributes = line.split(" ");
-            packetQueue.put(attributes);
-        }
+        Thread tdOutput = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        // Read the output of the command
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            //System.out.println(line);
+                            String[] attributes = line.split(" ");
+                            packetQueue.put(attributes);
+                        }
+                    }
+                    catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        tdOutput.start();
+
+        Thread allLogs = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        DebugPrints();
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        allLogs.start();
+
         p.waitFor(1, TimeUnit.MILLISECONDS);
 
         MPI.Finalize();
@@ -96,13 +125,14 @@ public class detection{
     public static void processPacket(String[] attributes) {
         for(int i=0; i<attributes.length; i++) {
             if (attributes[i].equals("IP")) {
-                responsePacket = attributes[i + 1].equals(".http-alt");
+                responsePacket = attributes[i + 1].contains(".http-alt");
+                //System.out.println("Response packet: " + responsePacket + " " + attributes[i + 1]);
                 break;
             }
         }
 
         if (responsePacket) {
-            System.out.println("Response packet detected");
+            //System.out.println("Response packet detected");
         }
         else {
             getAttributes(attributes);
@@ -122,9 +152,24 @@ public class detection{
         DistributedQueues.distributePackets(attributes);
     }
 
-    public static void printAttributes(Attributes a) {
-        String format = "Record ID:" + a.recordId + "\nTime: " + a.time + "\nSource: " + a.source + "\nFlags: " + a.flags + "\nSize: " + a.size + "\nLength: " + a.length;
-        System.out.println(format);
+    public static void DebugPrints() {
+        System.out.println("----------------------");
+        System.out.println("Debug prints");
+        System.out.println("----------------------");
+        System.out.println("Debug Log: No. records: " + Attributes.numOfRecords);
+        System.out.println("Debug Log: No. queues: " + Queues.queues.size());
+        System.out.println("Debug Log: No. queues alt: " + Queues.numQueues);
+        if (!Queues.queues.isEmpty()) {
+            for (int i = 0; i < Queues.queues.size(); i++) {
+                System.out.println("Debug Log: Q#" + i + " records: " + Queues.queues.get(i).recordIds.split(",").length);
+                System.out.println("Debug Log: Q#" + i + " records alt: " + Queues.queues.get(i).numOfRecords);
+            }
+        }
+        else {
+            System.out.println("Debug Log: No queues available");
+        }
+        System.out.println("Debug Log: Sources: " + PacketChecker.sources);
+        System.out.println("Debug Log: Index attribute: " + PacketChecker.indexAttribute);
     }
 
 }

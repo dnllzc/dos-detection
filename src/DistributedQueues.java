@@ -106,16 +106,16 @@ public class DistributedQueues {
             // 20:45:17.000000 - time format
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSSSSS");
             String stringTime = sdf.format(new Date());
-            System.out.println("Debug Log: Current time: " + stringTime);
-            System.out.println("Debug Log: Packet time: " + time);
+            //System.out.println("Debug Log: Current time: " + stringTime);
+            //System.out.println("Debug Log: Packet time: " + time);
             String[] currTime = stringTime.split(":");
             String[] packetTime = time.split(":");
 
             int minutesCurr = Integer.parseInt(currTime[1]);
             int minutesPacket = Integer.parseInt(packetTime[1]);
 
-            System.out.println("Debug Log: Current minutes: " + minutesCurr);
-            System.out.println("Debug Log: Packet minutes: " + minutesPacket);
+            //System.out.println("Debug Log: Current minutes: " + minutesCurr);
+            //System.out.println("Debug Log: Packet minutes: " + minutesPacket);
 
             if (minutesCurr - minutesPacket >= 2) {
                 // Remove record from Attributes list with the same recordId

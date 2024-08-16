@@ -10,9 +10,6 @@ public class PacketChecker {
 
     // Check all attributes of the packet
     public static void checkAll() {
-        System.out.println("----------------------");
-        System.out.println("Debug prints");
-        System.out.println("----------------------");
         for (Attributes a : attributesList) {
 
             // Check if the source is new
@@ -32,7 +29,6 @@ public class PacketChecker {
 
         // Get the time of the packet
         checkTime();
-        DebugPrints();
 
     }
 
@@ -46,21 +42,6 @@ public class PacketChecker {
         DistributedQueues.checkTime();
     }
 
-    // Just some debugging prints
-    public static void DebugPrints() {
-        System.out.println("Debug Log: No. records: " + Attributes.numOfRecords);
-        System.out.println("Debug Log: No. queues: " + Queues.queues.size());
-        System.out.println("Debug Log: No. queues alt: " + Queues.numQueues);
-        if (!Queues.queues.isEmpty()) {
-            System.out.println("Debug Log: Q#0 records: " + Queues.queues.get(0).recordIds.split(",").length);
-            System.out.println("Debug Log: Q#0 records alt: " + Queues.queues.get(0).numOfRecords);
-        }
-        else {
-            System.out.println("Debug Log: No queues available");
-        }
-        System.out.println("Debug Log: Sources: " + sources);
-        System.out.println("Debug Log: Index attribute: " + indexAttribute);
-    }
 
     public static void checkDeviation() {
         // Check if there is an unusual deviation in the number of packets of plus minus 30%
@@ -80,23 +61,5 @@ public class PacketChecker {
             }
         }
     }
-
-//        public static boolean checkFlags(String flags) {
-//            return false;
-//        }
-//
-//        public static boolean checkSize(int size) {
-//            if (size > 65535) {
-//                return true;
-//            }
-//            return false;
-//        }
-//
-//        public static boolean checkLength(int length) {
-//            if (length > 512) {
-//                return true;
-//            }
-//            return false;
-//        }
 
 }

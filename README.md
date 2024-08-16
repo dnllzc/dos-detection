@@ -44,7 +44,7 @@ Denial of Service (DoS) is a well-known attack vector aimed at using up the avai
 Or just run the auto compile and run script:
    ```sh
    sudo ./compile.sh
-   '''
+   ```
 
 ## Usage
 

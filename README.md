@@ -50,7 +50,7 @@ Or just run the auto compile and run script:
 
 1. **Run the detection application**:
    ```sh
-   sudo $MPJ_HOME/bin/mpjrun.sh -np 2 detection 0 $MPJ_HOME/conf/mpj8.conf enp0s3
+   sudo $MPJ_HOME/bin/mpjrun.sh -np 8 detection 0 $MPJ_HOME/conf/mpj8.conf enp0s3
    ```
 
 ## How It Works

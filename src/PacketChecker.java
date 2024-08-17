@@ -7,6 +7,8 @@ public class PacketChecker {
     public static String sources = "";
     public static int indexAttribute;
     public static boolean newSource = true;
+    public static int average = 0;
+    public static int deviationQueue = -2;
 
     // Check all attributes of the packet
     public static void checkAll() {
@@ -50,15 +52,22 @@ public class PacketChecker {
             sum += Queues.queues.get(i).numOfRecords;
         }
         if (!Queues.queues.isEmpty()) {
-            int average = sum / Queues.queues.size();
+            average = sum / Queues.queues.size();
             for (int i = 0; i < Queues.queues.size(); i++) {
-                if (Queues.queues.get(i).numOfRecords > average * 1.3 || Queues.queues.get(i).numOfRecords < average * 0.7) {
+                if (Queues.queues.get(i).numOfRecords > average * 1.3) {
                     System.out.println("Warning: Unusual deviation in the number of packets");
                     System.out.println("In queue " + Queues.queues.get(i).source + " there are " + Queues.queues.get(i).numOfRecords + " packets");
                     System.out.println("Average number of packets is " + average);
                     System.out.println("Expected number of packets is between " + average * 0.7 + " and " + average * 1.3);
+                    deviationQueue = i;
+                }
+                else {
+                    deviationQueue = -1;
                 }
             }
+        }
+        else {
+            deviationQueue = -2;
         }
     }
 

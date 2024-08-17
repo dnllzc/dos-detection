@@ -15,6 +15,7 @@ public class detection{
     public static boolean responsePacket = false;
     public static BlockingQueue<String[]> packetQueue = new LinkedBlockingQueue<>();
     public static String[] mpiArgs;
+    public static boolean visualization = false;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String[] commands = {"bash", "-c", "tcpdump", "-i", "any", "port", "8080", "and", "'(tcp-syn|tcp-ack)!=0'"};
@@ -22,16 +23,24 @@ public class detection{
         mpiArgs = args;
         MPI.Init(mpiArgs);
 
+        int rank = MPI.COMM_WORLD.Rank();
+
         // Define the command to be executed
         String cmd2 = "tcpdump -i any port 8080 and '(tcp-syn|tcp-ack)!=0'";
 
         //ProcessBuilder pb = new ProcessBuilder(cmd2);
         //Process p = pb.start();
+        if (rank == 0 && !visualization) {
+            visualTest.execute();
+            visualization = true;
+        }
 
         // Process to execute the command
         ProcessBuilder pb2 = new ProcessBuilder();
         pb2.command("bash", "-c", cmd2);
         Process p = pb2.start();
+
+
 
         // Thread to sort packets to queues
         Thread packetSort = new Thread(new Runnable() {
@@ -100,7 +109,9 @@ public class detection{
                 }
             }
         });
-        tdOutput.start();
+        if (rank == 0) {
+            tdOutput.start();
+        }
 
         Thread allLogs = new Thread(new Runnable() {
             @Override

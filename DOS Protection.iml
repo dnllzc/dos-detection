@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="mpi" level="project" />
+    <orderEntry type="library" name="javafx-sdk-22.0" level="project" />
   </component>
 </module>

@@ -146,14 +146,15 @@ public class visualTest {
         for (int i = 0; i < numQueues; i++) {
             maxQueueSize = Math.max(maxQueueSize, queueRecords[i]);
         }
+        if (maxQueueSize < 1000) maxQueueSize = 1000;
 
         for (int i = 0; i < numQueues; i++) {
             int fillPercentage = (int) ((double) queueRecords[i] / maxQueueSize * 100);
             int fillPanels = fillPercentage / 10;
 
-            for (int j = 0; j < 10; j++) {
-                if (j < fillPanels) {
-                    if (fillPercentage <= 50 || queueRecords[i] < 1000) {
+            for (int j = 9; j >= 0; j--) {
+                if (j >= 10 - fillPanels) {
+                    if (fillPercentage <= 50) {
                         queuePanels[i][j].setBackground(new Color(5, 171, 5));
                     }
                     else if (fillPercentage <= 80) {

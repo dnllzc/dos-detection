@@ -17,7 +17,6 @@ public class DistributedQueues {
         boolean isHttpAlt = false;
 
         // Get the attributes
-        label:
         for (int i = 0; i < attributes.length; i++) {
             switch (attributes[i]) {
                 case "IP":
@@ -36,7 +35,7 @@ public class DistributedQueues {
                         length = Integer.parseInt(attributes[i + 1].substring(0, attributes[i + 1].length() - 1));
                     }
                     Attributes.numOfRecords++;
-                    break label;
+                    break;
             }
         }
 

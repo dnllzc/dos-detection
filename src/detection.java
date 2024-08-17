@@ -7,8 +7,10 @@ import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class detection{
+public class detection {
 
     public static LinkedList<Attributes> attributesList = Attributes.attributesList;
     public static LinkedList<Queues> queues = Queues.queues;
@@ -16,6 +18,10 @@ public class detection{
     public static BlockingQueue<String[]> packetQueue = new LinkedBlockingQueue<>();
     public static String[] mpiArgs;
     public static boolean visualization = false;
+
+    public static final Lock attributesListLock = new ReentrantLock();
+    public static final Lock queuesLock = new ReentrantLock();
+    public static final Lock sourcesLock = new ReentrantLock();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //String[] commands = {"bash", "-c", "tcpdump", "-i", "any", "port", "8080", "and", "'(tcp-syn|tcp-ack)!=0'"};
@@ -120,7 +126,7 @@ public class detection{
                 while (true) {
                     try {
                         DebugPrints();
-                        Thread.sleep(3000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

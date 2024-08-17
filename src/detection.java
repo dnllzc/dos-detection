@@ -38,7 +38,8 @@ public class detection{
         // Process to execute the command
         ProcessBuilder pb2 = new ProcessBuilder();
         pb2.command("bash", "-c", cmd2);
-        Process p = pb2.start();
+        Process p;
+        p = pb2.start();
 
 
 
@@ -126,9 +127,14 @@ public class detection{
                 }
             }
         });
-        allLogs.start();
+        if (rank == 0) {
+            allLogs.start();
+        }
 
-        p.waitFor(1, TimeUnit.MILLISECONDS);
+
+        if (rank == 0) {
+            p.waitFor(1, TimeUnit.MILLISECONDS);
+        }
 
         MPI.Finalize();
     }

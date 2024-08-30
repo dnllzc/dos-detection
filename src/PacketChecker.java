@@ -11,6 +11,7 @@ public class PacketChecker {
     public static boolean newSource = true;
     public static int average = 0;
     public static int deviationQueue = -2;
+    public static int stDeviation = 0;
 
     // Check all attributes of the packet
     public static void checkAll() {
@@ -51,14 +52,30 @@ public class PacketChecker {
                 sum += Queues.queues.get(i).numOfRecords;
             }
             if (!Queues.queues.isEmpty()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSSSSS");
+                String stringTime = sdf.format(new Date());
+                int hour = Integer.parseInt(stringTime.substring(0, 2));
                 average = sum / Queues.queues.size();
+                stDeviation = (int) Math.sqrt((Queues.queues.get(0).numOfRecords - average) * (Queues.queues.get(0).numOfRecords - average) +
+                        (Queues.queues.get(1).numOfRecords - average) * (Queues.queues.get(1).numOfRecords - average) +
+                        (Queues.queues.get(2).numOfRecords - average) * (Queues.queues.get(2).numOfRecords - average) +
+                        (Queues.queues.get(3).numOfRecords - average) * (Queues.queues.get(3).numOfRecords - average));
                 for (int i = 0; i < Queues.queues.size(); i++) {
-                    if (Queues.queues.get(i).numOfRecords > average * 1.3) {
-                        System.out.println("Warning: Unusual deviation in the number of packets");
-                        System.out.println("In queue " + Queues.queues.get(i).source + " there are " + Queues.queues.get(i).numOfRecords + " packets");
-                        System.out.println("Average number of packets is " + average);
-                        System.out.println("Expected number of packets is between " + average * 0.7 + " and " + average * 1.3);
-                        deviationQueue = i;
+                    if (Queues.queues.get(i).numOfRecords > stDeviation * 1.3) {
+//                        System.out.println("Warning: Unusual deviation in the number of packets");
+//                        System.out.println("In queue " + Queues.queues.get(i).source + " there are " + Queues.queues.get(i).numOfRecords + " packets");
+//                        System.out.println("Average number of packets is " + average);
+//                        System.out.println("Standard deviation is " + stDeviation * 0.7 + " and " + stDeviation * 1.3);
+//                        deviationQueue = i;
+
+                        for (int j = 0; j < BollingerBands.bands.length; j++) {
+                            if (Queues.queues.get(i).numOfRecords > BollingerBands.bands[j][hour][0]) {
+                                System.out.println("Warning: The number of packets is above the upper band in Queue #" + i);
+                                System.out.println("The number of packets is " + Queues.queues.get(i).numOfRecords + " and the upper band is " + BollingerBands.bands[j][hour][0]);
+                                deviationQueue = i;
+                                break;
+                            }
+                        }
                     } else {
                         deviationQueue = -1;
                     }

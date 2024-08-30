@@ -40,6 +40,9 @@ public class detection {
             visualTest.execute();
             visualization = true;
         }
+        if (rank == 1) {
+            BollingerBands.Start();
+        }
 
         // Process to execute the command
         ProcessBuilder pb2 = new ProcessBuilder();

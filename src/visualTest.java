@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class visualTest {
     static JPanel[][] queuePanels = new JPanel[4][10];
@@ -12,6 +14,7 @@ public class visualTest {
     static int average = 0;
     static int deviation = 0;
 
+    static JLabel currTimeLabel;
     static JLabel numRecordsLabel;
     static JLabel numQueuesLabel;
     static JLabel queue1RecordsLabel;
@@ -21,6 +24,9 @@ public class visualTest {
     static JLabel sourcesLabel;
     static JLabel averageLabel;
     static JLabel deviationLabel;
+    static JLabel lowerBandLabel;
+    static JLabel upperBandLabel;
+    static JLabel expectedHourLabel;
 
     public static void execute() {
         JFrame frame = new JFrame();
@@ -51,6 +57,7 @@ public class visualTest {
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setBorder(BorderFactory.createTitledBorder("Queue Information"));
 
+        currTimeLabel = new JLabel("Current time: ");
         numRecordsLabel = new JLabel("No. of records: " + numRecords);
         numQueuesLabel = new JLabel("No. of queues: " + numQueues);
         queue1RecordsLabel = new JLabel("Q#1 records: " + queueRecords[0]);
@@ -60,7 +67,12 @@ public class visualTest {
         sourcesLabel = new JLabel("Sources: " + sources);
         averageLabel = new JLabel("Average: " + average);
         deviationLabel = new JLabel("Deviation: ");
+        lowerBandLabel = new JLabel("Lower band: ");
+        upperBandLabel = new JLabel("Upper band: ");
+        expectedHourLabel = new JLabel("Expected: ");
 
+        infoPanel.add(currTimeLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 50)));
         infoPanel.add(numRecordsLabel);
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         infoPanel.add(numQueuesLabel);
@@ -78,6 +90,12 @@ public class visualTest {
         infoPanel.add(averageLabel);
         infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         infoPanel.add(deviationLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add(lowerBandLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add(upperBandLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        infoPanel.add(expectedHourLabel);
 
         frame.add(queuesPanel);
         frame.add(infoPanel);
@@ -111,6 +129,9 @@ public class visualTest {
         average = PacketChecker.average;
         deviation = PacketChecker.deviationQueue;
 
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        String stringTime = sdf.format(new Date());
+        currTimeLabel.setText("Current time: " + stringTime);
         numRecordsLabel.setText("No. of records: " + numRecords);
         numQueuesLabel.setText("No. of queues: " + numQueues);
         queue1RecordsLabel.setText("Q#1 records: " + queueRecords[0]);
@@ -121,23 +142,48 @@ public class visualTest {
         averageLabel.setText("Average: " + average);
         switch(deviation) {
             case -2:
-                deviationLabel.setText("Deviation: No queues");
+                deviationLabel.setText("Deviation: No data");
                 break;
             case -1:
-                deviationLabel.setText("Deviation: No deviation");
+                deviationLabel.setText("Deviation: " + PacketChecker.stDeviation);
                 break;
             case 0:
-                deviationLabel.setText("Deviation: found in Queue 1, inspect");
+                deviationLabel.setText("Deviation: Queue 1, inspect");
                 break;
             case 1:
-                deviationLabel.setText("Deviation: found in Queue 2, inspect");
+                deviationLabel.setText("Deviation: Queue 2, inspect");
                 break;
             case 2:
-                deviationLabel.setText("Deviation: found in Queue 3, inspect");
+                deviationLabel.setText("Deviation: Queue 3, inspect");
                 break;
             case 3:
-                deviationLabel.setText("Deviation: found in Queue 4, inspect");
+                deviationLabel.setText("Deviation: Queue 4, inspect");
                 break;
+        }
+
+        if (BollingerBands.bands.length != 0) {
+            int hour = Integer.parseInt(stringTime.substring(0, 2));
+            int allTimeLow = BollingerBands.bands[0][hour][4];
+            int allTimeHigh = BollingerBands.bands[0][hour][0];
+            int allTimeAverage = BollingerBands.bands[0][hour][2];
+            for (int i = 0; i < BollingerBands.bands.length; i++) {
+                if (BollingerBands.bands[i][hour][4] < allTimeLow) {
+                    allTimeLow = BollingerBands.bands[i][hour][4];
+                }
+                if (BollingerBands.bands[i][hour][0] > allTimeHigh) {
+                    allTimeHigh = BollingerBands.bands[i][hour][0];
+                }
+                allTimeAverage += BollingerBands.bands[i][hour][2];
+            }
+            allTimeAverage /= BollingerBands.bands.length;
+
+            lowerBandLabel.setText("Lower band: " + allTimeLow);
+            upperBandLabel.setText("Upper band: " + allTimeHigh);
+            expectedHourLabel.setText("Expected at this hour: " + allTimeAverage);
+        } else {
+            lowerBandLabel.setText("Lower band: No data");
+            upperBandLabel.setText("Upper band: No data");
+            expectedHourLabel.setText("Expected: No data");
         }
     }
 

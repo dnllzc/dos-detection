@@ -36,9 +36,6 @@ public class PacketChecker {
             detection.attributesListLock.unlock();
         }
 
-        // Get the time of the packet
-        checkTime();
-
     }
 
 
@@ -48,6 +45,7 @@ public class PacketChecker {
         try {
             // Check if there is an unusual deviation in the number of packets of plus minus 30%
             int sum = 0;
+            stDeviation = 0;
             for (int i = 0; i < Queues.queues.size(); i++) {
                 sum += Queues.queues.get(i).numOfRecords;
             }
@@ -56,10 +54,10 @@ public class PacketChecker {
                 String stringTime = sdf.format(new Date());
                 int hour = Integer.parseInt(stringTime.substring(0, 2));
                 average = sum / Queues.queues.size();
-                stDeviation = (int) Math.sqrt((Queues.queues.get(0).numOfRecords - average) * (Queues.queues.get(0).numOfRecords - average) +
-                        (Queues.queues.get(1).numOfRecords - average) * (Queues.queues.get(1).numOfRecords - average) +
-                        (Queues.queues.get(2).numOfRecords - average) * (Queues.queues.get(2).numOfRecords - average) +
-                        (Queues.queues.get(3).numOfRecords - average) * (Queues.queues.get(3).numOfRecords - average));
+                for (int j = 0; j < Queues.queues.size(); j++) {
+                    stDeviation += (Queues.queues.get(j).numOfRecords - average) * (Queues.queues.get(j).numOfRecords - average);
+                }
+                stDeviation = (int) Math.sqrt(stDeviation);
                 for (int i = 0; i < Queues.queues.size(); i++) {
                     if (Queues.queues.get(i).numOfRecords > stDeviation * 1.3) {
 //                        System.out.println("Warning: Unusual deviation in the number of packets");
@@ -147,7 +145,7 @@ public class PacketChecker {
                 if (Queues.queues.get(i).numOfRecords < 1) {
                     break;
                 }
-                int recordIndexInQueue = Integer.parseInt(recordsQueues[Queues.queues.get(i).numOfRecords - 1]);
+                int recordIndexInQueue = Integer.parseInt(recordsQueues[0]);
                 String time = attributesList.get(recordIndexInQueue).time;
                 // Remove all entries in queue that are older than 2 minutes
                 // 20:45:17.000000 - time format
@@ -167,7 +165,7 @@ public class PacketChecker {
                 //System.out.println("Debug Log: Current minutes: " + minutesCurr);
                 //System.out.println("Debug Log: Packet minutes: " + minutesPacket);
 
-                if (minutesCurr - minutesPacket >= 2 && secondsCurr == secondsPacket) {
+                if (Math.abs(minutesCurr - minutesPacket )>= 2 && Math.abs(secondsCurr - secondsPacket) >= 0) {
                     // Remove record from Attributes list with the same recordId
                     for (int j = 0; j < attributesList.size(); j++) {
                         if (attributesList.get(j).recordId == recordIndexInQueue) {
@@ -183,9 +181,13 @@ public class PacketChecker {
                             for (int k = j; k < recordsQueues.length - 1; k++) {
                                 recordsQueues[k] = recordsQueues[k + 1];
                             }
-                            break;
+                            continue;
                         }
                     }
+
+                    String toReplace = " " + recordIndexInQueue;
+                    Queues.queues.get(i).recordIds.replace(toReplace, "");
+                    Queues.queues.get(i).numOfRecords--;
                 }
             }
         } finally {

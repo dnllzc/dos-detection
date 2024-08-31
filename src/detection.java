@@ -140,6 +140,23 @@ public class detection {
             allLogs.start();
         }
 
+        Thread twoMinutePackets = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        PacketChecker.checkTime();
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        if (rank == 0) {
+            twoMinutePackets.start();
+        }
+
 
         if (rank == 0) {
             p.waitFor(1, TimeUnit.MILLISECONDS);

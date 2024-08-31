@@ -71,6 +71,20 @@ public class visualTest {
         upperBandLabel = new JLabel("Upper band: ");
         expectedHourLabel = new JLabel("Expected: ");
 
+        currTimeLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        numRecordsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        numQueuesLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        queue1RecordsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        queue2RecordsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        queue3RecordsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        queue4RecordsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        sourcesLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        averageLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        deviationLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        lowerBandLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        upperBandLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        expectedHourLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
         infoPanel.add(currTimeLabel);
         infoPanel.add(Box.createRigidArea(new Dimension(0, 50)));
         infoPanel.add(numRecordsLabel);

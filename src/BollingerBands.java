@@ -4,7 +4,7 @@ import java.util.Date;
 public class BollingerBands {
     public static String time;
     public static int numOfQueues;
-    public static int[] packetsQueue;
+    public static int[][] packetsQueue = new int[4][60];
     public static int[][][] bands = new int[20][24][5];
     private static int dayCounter = 0;
 
@@ -14,10 +14,13 @@ public class BollingerBands {
     }
 
     public static void updateQueues() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSSSSS");
+        String stringTime = sdf.format(new Date());
+        int minute = Integer.parseInt(stringTime.substring(3, 5));
         numOfQueues = Queues.numQueues;
         if (numOfQueues == 0) return;
         for (int i = 0; i < numOfQueues; i++) {
-            packetsQueue[i] = Queues.queues.get(i).numOfRecords;
+            packetsQueue[i][minute] = Queues.queues.get(i).numOfRecords;
         }
     }
 
@@ -27,12 +30,16 @@ public class BollingerBands {
         int hour = Integer.parseInt(stringTime.substring(0, 2));
         int sum = 0;
         for (int i = 0; i < dayCounter; i++) {
-            sum += packetsQueue[i];
+            for (int j = 0; j < 60; j++) {
+                sum += packetsQueue[i][j];
+            }
         }
         int average = sum / dayCounter;
         int sumSquared = 0;
         for (int i = 0; i < dayCounter; i++) {
-            sumSquared += (packetsQueue[i] - average) * (packetsQueue[i] - average);
+            for (int j = 0; j < 60; j++) {
+                sumSquared += (packetsQueue[i][j] - average) * (packetsQueue[i][j] - average);
+            }
         }
         int standardDeviation = (int) Math.sqrt(sumSquared / dayCounter);
         bands[dayCounter][hour][0] = average + 2 * standardDeviation;
@@ -45,7 +52,7 @@ public class BollingerBands {
                 bands[i] = bands[i + 1];
             }
         }
-        else {
+        else if (hour == 0){
             dayCounter++;
         }
     }
